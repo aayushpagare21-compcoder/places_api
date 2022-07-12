@@ -25,6 +25,10 @@ class CustomErrorHandler extends Error {
     static unauthorizedUser(message) {  
         console.log('inswide');
         return new CustomErrorHandler(301, message);
+    } 
+
+    static cityNotFound(message) { 
+        return new CustomErrorHandler(404, message)
     }
     
 } 

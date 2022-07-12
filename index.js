@@ -17,25 +17,31 @@ app.use(routes);
 
 //middlewares  
 const ErrorHandler = require('./middlewares/ErrorHandler.js');  
-app.use(ErrorHandler);  
+app.use(ErrorHandler);   
 
 //Database Connection
 const mongoose = require('mongoose'); 
 
 mongoose.connect(process.env.DB_URL, {
     useNewUrlParser: true,
-    useUnifiedTopology: true
-}); 
+    useUnifiedTopology: true, 
+});  
 
+//For Serving static files
+app.use('/uploads', express.static('uploads')); 
+
+//global variable path
+const { dirname } = require('path');
+global.appRoot = dirname(require.main.filename);
+
+
+//Database Connection
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', () => {
     console.log('DB connected...');
 });  
 
-// console.log('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MmNiYmIxN2E0MjRmMjZjMWUzNzEwMmMiLCJpYXQiOjE2NTc1MTg4NzF9.6tEa2Ke4KtMtHWLp4gm0L8Qm-sNEBXoWKHVZ8CgQrew' === 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MmNiYmIzNGE0MjRmMjZjMWUzNzEwMzEiLCJpYXQiOjE2NTc1NDIxMTF9.D8LY02mSJ-QYo6lWXE0dCl0gtZ8nGNyUdabIdj0nhUo');
-
-//server running at 
+//Server running at port
 const port = process.env.PORT;   
-
 app.listen(port);
