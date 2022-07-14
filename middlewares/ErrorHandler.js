@@ -14,7 +14,7 @@ function ErrorHandler(err, req, res, next) {
             message : err.message
         }
     } 
-    console.log('aaya');
+    
     return res.status(statusCode).json(data);
 } 
 

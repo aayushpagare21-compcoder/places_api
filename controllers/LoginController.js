@@ -32,6 +32,7 @@ const LoginController = {
       return next(CustomErrorHandler.validationError(error.message));
     }
 
+
     try {
       //Checl if user has already registered or not
       const findUser = await User.findOne({ email: req.body.email });
@@ -63,7 +64,7 @@ const LoginController = {
 
           //* Saving token in databse
           const savedToken = Token.create({ token: token });
-
+        
           res.status(200).json({ token: token });
         }
       }
@@ -81,13 +82,15 @@ const LoginController = {
       return next(CustomErrorHandler.unauthorizedUser("Please Login First"));
     }
 
-    const token = authHeader.split(" ")[1];
+    const token = authHeader.split(" ")[1].trim();  
     
     try {
-        const deletedToken = await Token.deleteOne({token : token});  
-
+        const deletedToken = await Token.findOneAndDelete({token : token});
+        console.log(deletedToken);
         if (deletedToken) { 
             res.status(200).json({"message" : "logged out"})
+        } else { 
+          return CustomErrorHandler.unauthorizedUser("Please login first");
         }
     } catch (error) {
         return next(error);

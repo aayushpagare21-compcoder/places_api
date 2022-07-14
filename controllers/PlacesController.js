@@ -3,6 +3,7 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const joi = require("joi");
+// const joi = require('@hapi/joi');
 
 //Models
 const Place = require("../models/PlacesModel.js");
@@ -48,15 +49,22 @@ const PlacesController = {
         place_name: joi
           .string()
           .required()
-          .custom(
-            CustomValidator.placeNameValidation,
-            "place_name must contain only alphanumeric charecters"
-          ),
+          .custom((value, helper) => {
+            return new RegExp("^[a-zA-Z0-9]+$").test(value)
+              ? true
+              : helper.message(
+                  "Place_name must only contain alphanumeric chars"
+                );
+          }),
         city_name: joi.string().required(),
         place_pincode: joi
           .string()
           .required()
-          .custom(CustomValidator.pincodeValidation, "not a valid pincode"),
+          .custom((value, helper) => {
+            return new RegExp("^[0-9]{6}$").test(value)
+              ? true
+              : helper.message("Enter a valide Pincode");
+          }),
         place_rating: joi.number().min(0).max(5),
         place_latitude: joi.number().required(),
         place_longitude: joi.number().required(),
@@ -67,7 +75,7 @@ const PlacesController = {
       if (error) {
         //!if some error occurs we have to delete image from the server
         fs.unlink(`${appRoot}/${filePath}`, (err) => {
-          return next(error);
+          return next(err);
         });
         return next(CustomErrorHandler.validationError(error.message));
       }
@@ -99,12 +107,16 @@ const PlacesController = {
           place_longitude: req.body.place_longitude,
         });
 
+        var deleteFile = false;
         //!same co-ordinate check (very important)
         if (
           latittudeFound &&
           longitudeFound &&
           latittudeFound.place_name === longitudeFound.place_name
         ) {
+          fs.unlink(`${appRoot}/${filePath}`, (err) => {
+            return next(err);
+          });
           return next(
             CustomErrorHandler.alreadyExisits("co-ordinate already exists")
           );
@@ -112,6 +124,9 @@ const PlacesController = {
 
         //No duplicate places allowed
         if (placeFound) {
+          fs.unlink(`${appRoot}/${filePath}`, (err) => {
+            return next(err);
+          });
           return next(
             CustomErrorHandler.alreadyExisits(
               "place already exisits in databse"
@@ -119,11 +134,13 @@ const PlacesController = {
           );
         }
         if (pinFound) {
+          fs.unlink(`${appRoot}/${filePath}`, (err) => {
+            return next(err);
+          });
           return next(
             CustomErrorHandler.alreadyExisits("pin already exisits in databse")
           );
         }
-
         place = await Place.create({
           place_id: req.body.place_id,
           place_name: req.body.place_name,
@@ -136,7 +153,7 @@ const PlacesController = {
       } catch (error) {
         //!if some error occurs we have to delete image from the server
         fs.unlink(`${appRoot}/${filePath}`, (err) => {
-          return next(error);
+          return next(err);
         });
         return next(error);
       }
@@ -145,12 +162,12 @@ const PlacesController = {
   },
 
   async getPlaces(req, res, next) {
-    try { 
+    try {
       //Pagination
       const pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : 0;
       const page = req.query.page ? parseInt(req.query.page) : 0;
 
-      let placeFound; 
+      let placeFound;
 
       //! Sorted in descending order
       //! find by pincode - UNIQUE
