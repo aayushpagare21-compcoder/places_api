@@ -35,13 +35,6 @@ const placeSchema = mongoose.Schema(
         message: "Please enter correct pincode",
       },
     },
-
-    place_ratings: {
-      type: Number,
-      min: 0,
-      max: 5,
-    },
-
     place_latitude: {
       type: mongoose.Types.Decimal128,
       required : true

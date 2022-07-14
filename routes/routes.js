@@ -25,6 +25,9 @@ router.get('/api/protected', auth, (req, res) => {
 }) 
 
 //Add places
-router.post('/api/places', PlacesController.addPlaces); 
+router.post('/api/places', PlacesController.addPlaces);  
+
+//Get Places 
+router.get('/api/places', PlacesController.getPlaces);
 
 module.exports = router;
