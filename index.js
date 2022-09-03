@@ -9,7 +9,7 @@ const app = express();
 //using urlencoded data
 app.use(express.urlencoded({extended : false}));
 //To get req in JSON form
-app.use(express.json());  
+app.use(express.json());  // create a plan
 
 //routings
 const routes = require('./routes/routes.js');   
